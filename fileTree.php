@@ -1,3 +1,1 @@
-<div class="file-tree">
-    <!-- Content for File Tree -->
-</div>
+<!-- Content for File Tree -->
