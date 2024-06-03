@@ -1,20 +1,34 @@
 body, html {
+    --white: #ffffff;
+    --offwhite1: #f9f9f9;
+    --offwhite2: #f1f1f1;
+    --lightgrey: #ccc;
+    --medlightgrey: #999;
+    --medgrey: #555;
+    --darkgrey: #303030;
+    --offblack1: #222222;
+    --offblack2: #101010;
+    --black: #000000;
+    --accent1: #007bff;
+    --accent2: #0000ff;
     margin: 0;
     padding: 0;
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
-    color: #222222;
+    color: var(--offblack1);
     overflow-x: hidden; /* Prevent horizontal scroll */
 }
+
+/* header */
 
 .header {
     height: 65px;
     width: 100%;
     display: flex;
     align-items: center;
-    background-color: #f1f1f1;
+    background-color: var(--offwhite2);
     padding: 0 10px;
     box-sizing: border-box; /* Ensure padding is included in width calculation */
 }
@@ -31,7 +45,7 @@ body, html {
     margin-right: 15px;
 }
 
-.fa-folder-tree {
+.fa-folder-tree { /* the icon in the header */
     font-size: 22px;
     margin-right: 15px;
 }
@@ -46,7 +60,7 @@ body, html {
 .search-bar {
     flex-basis: 50%; /* Set the base width to 50% of the container */
     max-width: 500px; /* Optional: Set a maximum width */
-    min-width: 300px; /* Optional: Set a minimum width */
+    min-width: 120px; /* Optional: Set a minimum width */
     padding: 5px;
 }
 
@@ -71,29 +85,107 @@ body, html {
     margin-right: 10px;
 }
 
-.container {
+.container { /* for search bar */
     display: flex;
     flex: 1;
     overflow: hidden;
 }
 
+/* fileTree, main content, and dataPanel */
+
 .file-tree, .main-content, .data-panel {
     overflow-y: auto;
     overflow-x: hidden;
     resize: horizontal;
+    position: relative;
 }
 
 .file-tree {
     width: 20%;
-    background-color: #f9f9f9;
+    background-color: var(--offwhite1);
 }
 
 .main-content {
     width: 60%;
-    background-color: #ffffff;
+    background-color: var(--white);
+    flex-grow: 1; /* Allow main content to grow */
 }
 
 .data-panel {
     width: 20%;
-    background-color: #f9f9f9;
+    background-color: var(--offwhite1);
+}
+
+.resizer {
+    width: 5px;
+    background: var(--lightgrey);
+    cursor: ew-resize;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+#resizer-filetree {
+    right: 0;
+}
+
+#resizer-datapanel {
+    left: 0;
+}
+
+/* Gallery */
+
+.masonry-container {
+    column-gap: 10px;
+    padding: 10px;
+}
+
+.imageItem {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 15px;
+}
+
+.imageItem img {
+    display: block;
+    width: 100%;
+    border-radius: 15px;
+}
+
+/* Adjust column count and width based on screen size */
+@media (min-width: 1500px) {
+    .masonry-container {
+        column-count: 5;
+        column-width: 300px;
+    }
+}
+
+@media (max-width: 1499px) and (min-width: 1200px) {
+    .masonry-container {
+        column-count: 4;
+        column-width: 300px;
+    }
+}
+
+@media (max-width: 1199px) and (min-width: 900px) {
+    .masonry-container {
+        column-count: 3;
+        column-width: 300px;
+    }
+}
+
+@media (max-width: 899px) and (min-width: 600px) {
+    .masonry-container {
+        column-count: 2;
+        column-width: 300px;
+    }
+}
+
+@media (max-width: 599px) {
+    .masonry-container {
+        column-count: 1;
+        column-width: 100%;
+    }
 }

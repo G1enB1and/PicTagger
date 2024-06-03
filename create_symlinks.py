@@ -12,8 +12,8 @@ def create_symlink(target, link_name):
 def main():
     # Define the directories to be linked
     symlinks = [
-        {"target": "C:\\Pictures\\AI generated", "link_name": "C:\\Pictures\\Gallery\\Pictures\\AI_generated"},
-        {"target": "C:\\Pictures\\Wallpaper", "link_name": "C:\\Pictures\\Gallery\\Pictures\\Wallpaper"}
+        {"target": "C:\\Pictures\\AI generated", "link_name": "C:\\MAMP\\htdocs\\PicTagger\\Pictures\\AI_generated"},
+        {"target": "C:\\Pictures\\Wallpaper", "link_name": "C:\\MAMP\\htdocs\\PicTagger\\Pictures\\Wallpaper"}
     ]
 
     # Create each symlink
