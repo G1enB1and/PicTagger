@@ -1,4 +1,3 @@
-<!-- Content for File Tree -->
 <div id="leftPanelContent" class="scroller">
     <div id="expandCollapseControlsContainer">
         <div id="expandCollapseControls">
@@ -8,7 +7,7 @@
     </div>
     <div id="fileTreeContainer">
         <ul id="fileTree">
-            <!-- File tree will be dynamically populated -->
+            <!-- File tree will be dynamically populated by JavaScript -->
         </ul>
     </div>
 </div>

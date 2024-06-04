@@ -6,7 +6,7 @@ function get_file_tree($path) {
     $file_tree = [];
 
     foreach ($rii as $file) {
-        if ($file->isDir()){ 
+        if ($file->isDir()) { 
             continue;
         }
         $file_tree[] = str_replace($path . DIRECTORY_SEPARATOR, '', $file->getPathname());

@@ -1,4 +1,4 @@
-<!-- slideshow player of large view media within mainContent.php -->
+<!-- slideshow.php -->
 <div id="mediaContainer">
     <div id="slideshowImageContainer">
         <img src="static/images/loading.gif" alt="Displayed Image" id="slideshowDisplayedImage">
