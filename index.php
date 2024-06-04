@@ -12,17 +12,39 @@
 <body>
     <?php include 'header.php'; ?>
     <div class="container">
-        <div id="leftPanel" class="file-tree">
-            <?php include 'fileTree.php'; ?>
-            <div class="resizer" id="resizer-filetree"></div>
-        </div>
-        <div class="main-content">
-            <?php include 'mainContent.php'; ?>
-        </div>
-        <div class="data-panel">
-            <?php include 'dataPanel.php'; ?>
-            <div class="resizer" id="resizer-datapanel"></div>
-        </div>
+        <?php
+        $showLeftPanel = true; // Default state
+
+        // Check if the leftPanelToggle parameter is set
+        if (isset($_GET['leftPanelToggle']) && $_GET['leftPanelToggle'] === 'hide') {
+            $showLeftPanel = false;
+        }
+
+        if ($showLeftPanel) {
+            echo '<div id="leftPanel" class="file-tree">';
+            include 'fileTree.php';
+            echo '<div class="resizer" id="resizer-filetree"></div>';
+            echo '</div>';
+        }
+
+        $showDataPanel = true; // Default state
+
+        // Check if the dataPanelToggle parameter is set
+        if (isset($_GET['dataPanelToggle']) && $_GET['dataPanelToggle'] === 'hide') {
+            $showDataPanel = false;
+        }
+
+        echo '<div class="main-content">';
+        include 'mainContent.php';
+        echo '</div>';
+
+        if ($showDataPanel) {
+            echo '<div class="data-panel">';
+            include 'dataPanel.php';
+            echo '<div class="resizer" id="resizer-datapanel"></div>';
+            echo '</div>';
+        }
+        ?>
     </div>
     <script src="static/js/script.js"></script>
     <script src="static/js/utils_pinterest.js" type="module"></script>
