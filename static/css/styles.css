@@ -43,7 +43,7 @@ body, html {
     margin-right: 15px;
 }
 
-.fa-folder-tree {
+.fa-folder-tree { /* icon for folder tree in the header */
     font-size: 22px;
     margin-right: 15px;
 }
@@ -89,16 +89,11 @@ body, html {
     overflow: hidden;
 }
 
-.file-tree, .main-content, .data-panel {
+.main-content, .data-panel {
     overflow-y: auto;
     overflow-x: hidden;
     resize: horizontal;
     position: relative;
-}
-
-.file-tree {
-    width: 20%;
-    background-color: var(--offwhite1);
 }
 
 .main-content {
@@ -148,6 +143,7 @@ body, html {
     display: block;
     width: 100%;
     border-radius: 15px;
+    cursor: pointer;
 }
 
 /* Adjust column count and width based on screen size */
@@ -184,4 +180,248 @@ body, html {
         column-count: 1;
         column-width: 100%;
     }
+}
+
+/* slideshow styles */
+
+#mediaContainer {
+    flex-grow: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: width 0.3s; /* Smooth transition for resizing */
+}
+
+.mediaControls {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    border: none;
+    background-color: transparent;
+    color: var(--offblack2);
+    cursor: pointer;
+}
+
+#playPauseButton {
+    position: absolute; /* Ensure correct positioning */
+    bottom: 50px;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.5);
+    color: var(--offblack2);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 9999; /* Ensure play/pause stays on top of other content */
+}
+
+#playPauseHoverArea {
+    position: absolute;
+    top: 0;
+    left: 25%; /* Center the hover area */
+    width: 50%;
+    height: 100%;
+    background-color: transparent; /* Invisible, only for detecting hover */
+    z-index: 1; /* Below buttons but above the image */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#playPauseHoverArea:hover + #playPauseButton,
+#playPauseButton:hover {
+    opacity: 1;
+}
+
+#playPauseButton .fa-play,
+#playPauseButton .fa-pause {
+    font-size: 24px;
+}
+
+#playPauseButton .fa-pause {
+    display: none;
+}
+
+#slideshowImageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%; /* Ensure the image does not exceed the main content width */
+    height: 100%;
+    position: relative; /* Ensure absolute positioned elements are relative to this container */
+}
+
+#slideshowDisplayedImage {
+    display: none; /* Initially hide the image element */
+}
+
+#slideshowDisplayedVideo {
+    display: none; /* Initially hide the video element */
+}
+
+#slideshowDisplayedImage img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+#slideshowDisplayedVideo video {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+#prevButton {
+    left: 20px;
+    z-index: 100; /* Ensure it stays above other elements */
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    border: none;
+    background-color: transparent;
+    color: var(--offblack2);
+    cursor: pointer;
+}
+
+#nextButton {
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    border: none;
+    background-color: transparent;
+    color: var(--offblack2);
+    cursor: pointer;
+}
+
+/* fileTree */
+
+.file-tree {
+    width: 20%;
+    max-width: 40%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    resize: horizontal;
+    position: relative;
+    background-color: var(--offwhite1);
+    margin: 0px;
+    padding: 0px;
+}
+
+#leftPanel { 
+    /* flex-shrink: 0; */ /* not sure if I need this or not yet */
+    margin: 0px;
+    padding: 0px;
+}
+
+.scroller {
+    --scrollbar-color-thumb: #222;
+    --scrollbar-color-track: #555;
+    --scrollbar-width: thin;
+    --scrollbar-width-legacy: 0.5rem;
+}
+
+@supports (scrollbar-width: auto) {
+    .scroller {
+      scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+      scrollbar-width: var(--scrollbar-width);
+    }
+  }
+  
+  @supports selector(::-webkit-scrollbar) {
+    .scroller {
+      text-align: justify;
+    }
+    .scroller::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-color-thumb);
+    }
+    .scroller::-webkit-scrollbar-track {
+      background: var(--scrollbar-color-track);
+    }
+    .scroller::-webkit-scrollbar {
+      max-width: var(--scrollbar-width-legacy);
+      max-height: var(--scrollbar-width-legacy);
+    }
+  }
+
+#leftPanelContent {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    margin: 0px;
+    padding: 0px;
+}
+
+#fileTreeContainer {
+    padding: 0px 10px 10px; /*top, left+right, bottom*/
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: calc(100% - 20px); /* Adjust for padding */
+}
+
+/* Hide bullets in the file tree */
+#fileTree {
+    list-style-type: none; /* Remove bullets */
+    padding-left: 0; /* Remove padding */
+}
+
+#fileTree li {
+    margin: 5px 0;
+    cursor: pointer;
+    position: relative;
+    padding-left: 20px; /* Add space for the toggle icon */
+}
+
+#fileTree li .toggle-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+#fileTree li ul {
+    list-style-type: none; /* Remove bullets from sub-lists */
+    padding-left: 0px; /* Add indentation for sub-lists */
+}
+
+#expandCollapseControlsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+}
+
+#expandCollapseControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#expandCollapseControls i {
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--offblack2);
+    transition: color 0.3s;
+}
+
+#expandCollapseControls i:hover {
+    color: #007bff;
 }

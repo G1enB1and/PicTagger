@@ -12,7 +12,7 @@
 <body>
     <?php include 'header.php'; ?>
     <div class="container">
-        <div class="file-tree">
+        <div id="leftPanel" class="file-tree">
             <?php include 'fileTree.php'; ?>
             <div class="resizer" id="resizer-filetree"></div>
         </div>
