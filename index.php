@@ -31,7 +31,7 @@
         <div class="main-content" id="mainContent">
             <?php include 'mainContent.php'; ?>
         </div>
-        
+
         <?php
         $showDataPanel = true; // Default state
 

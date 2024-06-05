@@ -308,8 +308,61 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mediaPath.endsWith('.mp4')) {
                 mediaElement.controls = true;
             }
+            mediaElement.addEventListener('click', () => handleImageClick(mediaPath)); // Add click event listener
             imageGrid.appendChild(mediaElement);
         });
+    }
+
+    // Function to handle image click event
+    function handleImageClick(mediaPath) {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('view', 'slideshow');
+        currentUrl.searchParams.set('image', mediaPath);
+        window.history.pushState({}, '', currentUrl.toString());
+        loadSlideshow(mediaPath);
+    }
+
+    // Function to load slideshow
+    function loadSlideshow(mediaPath) {
+        fetch('slideshow.php')
+            .then(response => response.text())
+            .then(html => {
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = html;
+                displayMedia(mediaPath);
+            })
+            .catch(error => console.error('Error loading slideshow:', error));
+    }
+
+    // Update displayMedia to accept a media path
+    function displayMedia(mediaUrl) {
+        const imageElement = document.getElementById('slideshowDisplayedImage');
+        const videoElement = document.getElementById('slideshowDisplayedVideo');
+
+        console.log('displayMedia called');
+        console.log('mediaUrl:', mediaUrl);
+        console.log('data:', data);
+
+        if (imageElement) {
+            imageElement.style.display = 'none';
+        }
+        if (videoElement) {
+            videoElement.style.display = 'none';
+            videoElement.src = ''; // Clear the video source
+        }
+
+        if (mediaUrl) {
+            console.log(`Displaying media from URL: ${mediaUrl}`);
+            preloadAndDisplayMedia(decodeURIComponent(mediaUrl), imageElement, videoElement);
+        } else if (data.length > 0) {
+            const firstMediaUrl = data[0];
+            console.log(`Displaying first media: ${firstMediaUrl}`);
+            preloadAndDisplayMedia(firstMediaUrl, imageElement, videoElement);
+            history.replaceState(null, '', `?image=${encodeURIComponent(firstMediaUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
+        } else {
+            console.error('Media URL not found in query parameters.');
+        }
+        preloadAdjacentMedia();
     }
 
     function initializePage() {
