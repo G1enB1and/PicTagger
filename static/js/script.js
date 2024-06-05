@@ -99,6 +99,16 @@ document.addEventListener('DOMContentLoaded', () => {
         initResize(resizerDataPanel, dataPanel, false);
     }
 
+    // Function to save panel state to session storage
+    function savePanelState() {
+        const leftPanel = document.getElementById('leftPanel');
+        const isLeftPanelOpen = leftPanel && leftPanel.style.display !== 'none';
+        const dataPanel = document.querySelector('.data-panel');
+        const isDataPanelOpen = dataPanel && dataPanel.style.display !== 'none';
+        sessionStorage.setItem('leftPanelOpen', isLeftPanelOpen);
+        sessionStorage.setItem('dataPanelOpen', isDataPanelOpen);
+    }
+
     // Code from script2.js for handling media
     let data = [];
     let intervalId = null;
@@ -241,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInterval(intervalId);
             intervalId = null;
             if (playIcon) playIcon.style.display = 'block';
-            if (pauseIcon) playIcon.style.display = 'none';
+            if (pauseIcon) pauseIcon.style.display = 'none';
             sessionStorage.setItem('isPlaying', 'false');
             console.log('Paused');
         } else {
@@ -287,6 +297,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to render images in the gallery
+    function renderImages(images) {
+        const imageGrid = document.getElementById('imageGrid');
+        imageGrid.innerHTML = ''; // Clear previous images
+        images.forEach((mediaPath) => {
+            const mediaElement = document.createElement(mediaPath.endsWith('.mp4') ? 'video' : 'img');
+            mediaElement.src = mediaPath;
+            mediaElement.classList.add('imageItem');
+            if (mediaPath.endsWith('.mp4')) {
+                mediaElement.controls = true;
+            }
+            imageGrid.appendChild(mediaElement);
+        });
+    }
+
     function initializePage() {
         console.log('Initializing page');
 
@@ -296,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(images => {
                 data = images;
                 console.log(`Data loaded: ${JSON.stringify(data)}`);
+                renderImages(data); // Render images in the gallery
                 displayMedia(); // Display the media after data is loaded
 
                 // Event listener for the "Next" button
