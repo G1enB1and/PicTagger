@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialization code and variable declarations
     const resizerFileTree = document.getElementById('resizer-filetree');
     const resizerDataPanel = document.getElementById('resizer-datapanel');
     const fileTree = document.querySelector('.file-tree');
@@ -18,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Left Panel Toggle Param:', leftPanelToggleParam);
     console.log('Show Data Panel:', showDataPanel);
     console.log('Show Left Panel:', showLeftPanel);
+
+    let data = [];
+    let intervalId = null;
+    const transitionInterval = 4000; // 4 seconds
 
     // Function to toggle data panel
     const toggleDataPanel = (event) => {
@@ -99,43 +104,79 @@ document.addEventListener('DOMContentLoaded', () => {
         initResize(resizerDataPanel, dataPanel, false);
     }
 
-    // Function to save panel state to session storage
-    function savePanelState() {
-        const leftPanel = document.getElementById('leftPanel');
-        const isLeftPanelOpen = leftPanel && leftPanel.style.display !== 'none';
-        const dataPanel = document.querySelector('.data-panel');
-        const isDataPanelOpen = dataPanel && dataPanel.style.display !== 'none';
-        sessionStorage.setItem('leftPanelOpen', isLeftPanelOpen);
-        sessionStorage.setItem('dataPanelOpen', isDataPanelOpen);
+    // Function to render images in the gallery
+    function renderImages(images) {
+        const imageGrid = document.getElementById('imageGrid');
+        imageGrid.innerHTML = ''; // Clear previous images
+        images.forEach((mediaPath) => {
+            const mediaElement = document.createElement(mediaPath.endsWith('.mp4') ? 'video' : 'img');
+            mediaElement.src = mediaPath;
+            mediaElement.classList.add('imageItem');
+            if (mediaPath.endsWith('.mp4')) {
+                mediaElement.controls = true;
+            }
+            mediaElement.addEventListener('click', () => handleImageClick(mediaPath)); // Add click event listener
+            imageGrid.appendChild(mediaElement);
+        });
     }
 
-    // Code from script2.js for handling media
-    let data = [];
-    let intervalId = null;
-    let preloadedNextImage = new Image();
-    let preloadedPrevImage = new Image();
-
-    console.log('Script2 functionality loaded');
-
-    function getQueryParam(name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(name);
+    // Function to handle image click event
+    function handleImageClick(mediaPath) {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('view', 'slideshow');
+        currentUrl.searchParams.set('image', mediaPath);
+        window.history.pushState({}, '', currentUrl.toString());
+        loadSlideshow(mediaPath);
     }
 
-    function getCurrentImageUrl() {
-        const params = new URLSearchParams(window.location.search);
-        const currentImageUrl = params.get('image');
-        console.log(`Current image URL: ${currentImageUrl}`);
-        return currentImageUrl;
+    // Function to load slideshow
+    function loadSlideshow(mediaPath) {
+        fetch('slideshow.php')
+            .then(response => response.text())
+            .then(html => {
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = html;
+                displayMedia(mediaPath);
+                initializeSlideshowControls();
+            })
+            .catch(error => console.error('Error loading slideshow:', error));
     }
 
-    function getPanelState() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('panel') === 'open';
+    // Function to initialize slideshow controls
+    function initializeSlideshowControls() {
+        const nextButton = document.getElementById('nextButton');
+        if (nextButton) {
+            nextButton.addEventListener('click', nextImage);
+        }
+
+        const prevButton = document.getElementById('prevButton');
+        if (prevButton) {
+            prevButton.addEventListener('click', prevImage);
+        }
+
+        const playPauseButton = document.getElementById('playPauseButton');
+        if (playPauseButton) {
+            playPauseButton.addEventListener('click', togglePlayPause);
+        }
+
+        // Ensure the initial play/pause state
+        const isPlaying = sessionStorage.getItem('isPlaying');
+        if (isPlaying === 'true') {
+            intervalId = setInterval(nextImage, transitionInterval);
+            if (playPauseButton) {
+                playPauseButton.querySelector('.fa-play').style.display = 'none';
+                playPauseButton.querySelector('.fa-pause').style.display = 'block';
+            }
+        } else {
+            if (playPauseButton) {
+                playPauseButton.querySelector('.fa-play').style.display = 'block';
+                playPauseButton.querySelector('.fa-pause').style.display = 'none';
+            }
+        }
     }
 
-    function displayMedia() {
-        const mediaUrl = getQueryParam('image');
+    // Function to update displayMedia to accept a media path
+    function displayMedia(mediaUrl) {
         const imageElement = document.getElementById('slideshowDisplayedImage');
         const videoElement = document.getElementById('slideshowDisplayedVideo');
 
@@ -151,20 +192,21 @@ document.addEventListener('DOMContentLoaded', () => {
             videoElement.src = ''; // Clear the video source
         }
 
-        if (!mediaUrl && data.length > 0) {
+        if (mediaUrl) {
+            console.log(`Displaying media from URL: ${mediaUrl}`);
+            preloadAndDisplayMedia(decodeURIComponent(mediaUrl), imageElement, videoElement);
+        } else if (data.length > 0) {
             const firstMediaUrl = data[0];
             console.log(`Displaying first media: ${firstMediaUrl}`);
             preloadAndDisplayMedia(firstMediaUrl, imageElement, videoElement);
             history.replaceState(null, '', `?image=${encodeURIComponent(firstMediaUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
-        } else if (mediaUrl) {
-            console.log(`Displaying media from URL: ${mediaUrl}`);
-            preloadAndDisplayMedia(decodeURIComponent(mediaUrl), imageElement, videoElement);
         } else {
             console.error('Media URL not found in query parameters.');
         }
         preloadAdjacentMedia();
     }
 
+    // Function to preload and display media
     function preloadAndDisplayMedia(src, imgElement, vidElement) {
         console.log('preloadAndDisplayMedia called with src:', src);
         const isVideo = src.endsWith('.mp4');
@@ -189,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to preload adjacent media
     function preloadAdjacentMedia() {
         const currentMediaUrl = getCurrentImageUrl();
         if (!currentMediaUrl) {
@@ -207,9 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Preloading previous media: ${data[prevIndex]}`);
     }
 
+    // Function to navigate to the next image
     function nextImage() {
         const currentMediaUrl = getCurrentImageUrl();
-        const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
+        const panelState = getPanelState() ? 'open' : 'closed';
         if (!currentMediaUrl) {
             console.error('Media URL not found.');
             return;
@@ -225,9 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to navigate to the previous image
     function prevImage() {
         const currentMediaUrl = getCurrentImageUrl();
-        const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
+        const panelState = getPanelState() ? 'open' : 'closed';
         if (!currentMediaUrl) {
             console.error('Media URL not found.');
             return;
@@ -243,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to toggle play/pause
     function togglePlayPause() {
         const playPauseButton = document.getElementById('playPauseButton');
         const playIcon = playPauseButton ? playPauseButton.querySelector('.fa-play') : null;
@@ -255,9 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('isPlaying', 'false');
             console.log('Paused');
         } else {
-            intervalId = setInterval(nextImage, 5000);
+            intervalId = setInterval(nextImage, transitionInterval);
             if (playIcon) playIcon.style.display = 'none';
-            if (pauseIcon) playIcon.style.display = 'block';
+            if (pauseIcon) pauseIcon.style.display = 'block';
             sessionStorage.setItem('isPlaying', 'true');
             console.log('Playing');
         }
@@ -295,184 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.style.opacity = 0;
             });
         }
-    }
-
-    // Function to render images in the gallery
-    function renderImages(images) {
-        const imageGrid = document.getElementById('imageGrid');
-        imageGrid.innerHTML = ''; // Clear previous images
-        images.forEach((mediaPath) => {
-            const mediaElement = document.createElement(mediaPath.endsWith('.mp4') ? 'video' : 'img');
-            mediaElement.src = mediaPath;
-            mediaElement.classList.add('imageItem');
-            if (mediaPath.endsWith('.mp4')) {
-                mediaElement.controls = true;
-            }
-            mediaElement.addEventListener('click', () => handleImageClick(mediaPath)); // Add click event listener
-            imageGrid.appendChild(mediaElement);
-        });
-    }
-
-    // Function to handle image click event
-    function handleImageClick(mediaPath) {
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('view', 'slideshow');
-        currentUrl.searchParams.set('image', mediaPath);
-        window.history.pushState({}, '', currentUrl.toString());
-        loadSlideshow(mediaPath);
-    }
-
-    // Function to load slideshow
-    function loadSlideshow(mediaPath) {
-        fetch('slideshow.php')
-            .then(response => response.text())
-            .then(html => {
-                const mainContent = document.getElementById('mainContent');
-                mainContent.innerHTML = html;
-                displayMedia(mediaPath);
-            })
-            .catch(error => console.error('Error loading slideshow:', error));
-    }
-
-    // Update displayMedia to accept a media path
-    function displayMedia(mediaUrl) {
-        const imageElement = document.getElementById('slideshowDisplayedImage');
-        const videoElement = document.getElementById('slideshowDisplayedVideo');
-
-        console.log('displayMedia called');
-        console.log('mediaUrl:', mediaUrl);
-        console.log('data:', data);
-
-        if (imageElement) {
-            imageElement.style.display = 'none';
-        }
-        if (videoElement) {
-            videoElement.style.display = 'none';
-            videoElement.src = ''; // Clear the video source
-        }
-
-        if (mediaUrl) {
-            console.log(`Displaying media from URL: ${mediaUrl}`);
-            preloadAndDisplayMedia(decodeURIComponent(mediaUrl), imageElement, videoElement);
-        } else if (data.length > 0) {
-            const firstMediaUrl = data[0];
-            console.log(`Displaying first media: ${firstMediaUrl}`);
-            preloadAndDisplayMedia(firstMediaUrl, imageElement, videoElement);
-            history.replaceState(null, '', `?image=${encodeURIComponent(firstMediaUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
-        } else {
-            console.error('Media URL not found in query parameters.');
-        }
-        preloadAdjacentMedia();
-    }
-
-    function initializePage() {
-        console.log('Initializing page');
-
-        // Fetch images.json to populate the data variable
-        fetch('images.json')
-            .then(response => response.json())
-            .then(images => {
-                data = images;
-                console.log(`Data loaded: ${JSON.stringify(data)}`);
-                renderImages(data); // Render images in the gallery
-                displayMedia(); // Display the media after data is loaded
-
-                // Event listener for the "Next" button
-                const nextButton = document.getElementById('nextButton');
-                if (nextButton) {
-                    nextButton.removeEventListener('click', nextImage);
-                    nextButton.addEventListener('click', nextImage);
-                    console.log('Next button initialized');
-                }
-
-                // Event listener for the "Previous" button
-                const prevButton = document.getElementById('prevButton');
-                if (prevButton) {
-                    prevButton.removeEventListener('click', prevImage);
-                    prevButton.addEventListener('click', prevImage);
-                    console.log('Previous button initialized');
-                }
-
-                // Event listener for the "Play/Pause" button
-                const playPauseButton = document.getElementById('playPauseButton');
-                if (playPauseButton) {
-                    playPauseButton.removeEventListener('click', togglePlayPause);
-                    playPauseButton.addEventListener('click', togglePlayPause);
-                    console.log('Play/Pause button initialized');
-                }
-
-                // Restore play/pause state
-                const isPlaying = sessionStorage.getItem('isPlaying');
-                if (isPlaying === 'true') {
-                    intervalId = setInterval(nextImage, 5000);
-                    if (playPauseButton) {
-                        playPauseButton.querySelector('.fa-play').style.display = 'none';
-                        playPauseButton.querySelector('.fa-pause').style.display = 'block';
-                    }
-                    console.log('Resumed playing');
-                } else {
-                    if (playPauseButton) {
-                        playPauseButton.querySelector('.fa-play').style.display = 'block';
-                        playPauseButton.querySelector('.fa-pause').style.display = 'none';
-                    }
-                    console.log('Paused state');
-                }
-
-                // Add keypress event listener
-                document.addEventListener('keydown', handleKeyPress);
-                console.log('Keypress event listener added');
-            })
-            .catch(error => console.error('Error fetching images:', error));
-
-        const fileTreeToggleOpened = document.getElementById('fileTreeToggleOpened');
-        const fileTreeToggleClosed = document.getElementById('fileTreeToggleClosed');
-        const logoClosed = document.getElementById('logoClosed');
-        const leftPanel = document.getElementById('leftPanel');
-        const resizeHandle = document.querySelector('.resize-handle');
-        let isResizing = false;
-
-        function toggleLeftPanel() {
-            if (leftPanel.style.display === 'none' || leftPanel.style.display === '') {
-                leftPanel.style.display = 'block';
-                if (fileTreeToggleClosed) fileTreeToggleClosed.style.display = 'none';
-                if (logoClosed) logoClosed.style.display = 'none';
-            } else {
-                leftPanel.style.display = 'none';
-                if (fileTreeToggleClosed) fileTreeToggleClosed.style.display = 'flex';
-                if (logoClosed) logoClosed.style.display = 'block';
-            }
-            savePanelState(); // Save panel state after toggling
-        }
-
-        if (fileTreeToggleOpened) {
-            fileTreeToggleOpened.addEventListener('click', toggleLeftPanel);
-        }
-        if (fileTreeToggleClosed) {
-            fileTreeToggleClosed.addEventListener('click', toggleLeftPanel);
-        }
-
-        if (resizeHandle) {
-            resizeHandle.addEventListener('mousedown', (e) => {
-                isResizing = true;
-                document.addEventListener('mousemove', resizePanel);
-                document.addEventListener('mouseup', stopResizing);
-            });
-        }
-
-        function resizePanel(e) {
-            if (!isResizing) return;
-            const newWidth = Math.min(e.clientX, window.innerWidth * 0.24); // Limit the maximum width to 24%
-            if (newWidth < window.innerWidth * 0.1 || newWidth > window.innerWidth * 0.24) return;
-            leftPanel.style.width = `${newWidth}px`;
-        }
-
-        function stopResizing() {
-            isResizing = false;
-            document.removeEventListener('mousemove', resizePanel);
-            document.removeEventListener('mouseup', stopResizing);
-        }
-
-        savePanelState(); // Save panel state on load
     }
 
     function expandAll() {
@@ -605,6 +473,43 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             preloader.src = mediaUrl;
         }
+    }
+
+    function getCurrentImageUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const currentImageUrl = params.get('image');
+        console.log(`Current image URL: ${currentImageUrl}`);
+        return currentImageUrl;
+    }
+
+    function getPanelState() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('panel') === 'open';
+    }
+
+    function initializePage() {
+        console.log('Initializing page');
+
+        // Restore panel state as soon as possible to avoid flicker
+        const leftPanel = document.getElementById('leftPanel');
+        const isPanelOpen = getPanelState();
+        leftPanel.style.display = isPanelOpen ? 'block' : 'none';
+
+        // Fetch images.json to populate the data variable
+        fetch('api.php?action=get_images')
+            .then(response => response.json())
+            .then(images => {
+                data = images;
+                console.log(`Data loaded: ${JSON.stringify(data)}`);
+                renderImages(data); // Display the gallery images
+            })
+            .catch(error => console.error('Error fetching images:', error));
+
+        populateFileTree();
+        document.getElementById('expandAll').addEventListener('click', expandAll);
+        document.getElementById('collapseAll').addEventListener('click', collapseAll);
+
+        document.addEventListener('keydown', handleKeyPress);
     }
 
     initializePage();

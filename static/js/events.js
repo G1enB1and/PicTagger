@@ -1,5 +1,5 @@
-// events.js
 import { nextImage, prevImage, togglePlayPause } from './media.js';
+import { expandAll, collapseAll } from './fileTree.js';
 
 // Function to handle keypress
 export function handleKeyPress(event) {
@@ -17,26 +17,5 @@ export function handleKeyPress(event) {
     }
 }
 
-// Function to expand all file tree nodes
-export function expandAll() {
-    const toggleIcons = document.querySelectorAll('#fileTree .toggle-icon');
-    toggleIcons.forEach(icon => {
-        const subList = icon.parentElement.querySelector('ul');
-        if (subList) {
-            subList.style.display = 'block';
-            icon.innerHTML = '&#9660;'; // Down pointing triangle
-        }
-    });
-}
-
-// Function to collapse all file tree nodes
-export function collapseAll() {
-    const toggleIcons = document.querySelectorAll('#fileTree .toggle-icon');
-    toggleIcons.forEach(icon => {
-        const subList = icon.parentElement.querySelector('ul');
-        if (subList) {
-            subList.style.display = 'none';
-            icon.innerHTML = '&#9654;'; // Right pointing triangle
-        }
-    });
-}
+// Export expandAll and collapseAll
+export { expandAll, collapseAll };

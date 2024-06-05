@@ -31,7 +31,7 @@
         <div class="main-content" id="mainContent">
             <?php include 'mainContent.php'; ?>
         </div>
-
+        
         <?php
         $showDataPanel = true; // Default state
 
@@ -48,6 +48,6 @@
         }
         ?>
     </div>
-    <script src="static/js/script.js"></script>
+    <script src="static/js/main.js" type="module"></script>
 </body>
 </html>

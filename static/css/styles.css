@@ -190,8 +190,10 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1;
+    overflow: hidden; /* Prevent scrolling */
+    position: relative;
     transition: width 0.3s; /* Smooth transition for resizing */
+    z-index: 1;
 }
 
 .mediaControls {
@@ -264,12 +266,14 @@ body, html {
     position: relative; /* Ensure absolute positioned elements are relative to this container */
 }
 
-#slideshowDisplayedImage {
-    display: none; /* Initially hide the image element */
-}
-
+#slideshowDisplayedImage,
 #slideshowDisplayedVideo {
-    display: none; /* Initially hide the video element */
+    display: none; /* Initially hide the image element */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain; /* Ensure the image/video fits within the container */
 }
 
 #slideshowDisplayedImage img {
@@ -288,27 +292,27 @@ body, html {
     object-fit: contain;
 }
 
-#prevButton {
-    left: 20px;
-    z-index: 100; /* Ensure it stays above other elements */
+#prevButton,
+#nextButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     width: 40px;
     height: 40px;
     font-size: 24px;
     border: none;
-    background-color: transparent;
-    color: var(--offblack2);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: var(--offwhite1);
     cursor: pointer;
+    z-index: 10;
+}
+
+#prevButton {
+    left: 20px;
 }
 
 #nextButton {
     right: 20px;
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-    border: none;
-    background-color: transparent;
-    color: var(--offblack2);
-    cursor: pointer;
 }
 
 /* fileTree */

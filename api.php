@@ -2,17 +2,21 @@
 header('Content-Type: application/json');
 
 function get_file_tree($path) {
-    $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path));
-    $file_tree = [];
+    $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
+    $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
+    $tree = [];
 
-    foreach ($rii as $file) {
-        if ($file->isDir()) { 
-            continue;
+    foreach ($iterator as $file) {
+        $path = $file->getPathname();
+        $relativePath = str_replace('\\', '/', str_replace(realpath($path) . DIRECTORY_SEPARATOR, '', $path));
+        if ($file->isDir()) {
+            $tree[] = ['name' => $file->getFilename(), 'path' => $relativePath, 'type' => 'directory'];
+        } else {
+            $tree[] = ['name' => $file->getFilename(), 'path' => $relativePath, 'type' => 'file'];
         }
-        $file_tree[] = str_replace($path . DIRECTORY_SEPARATOR, '', $file->getPathname());
     }
 
-    return $file_tree;
+    return $tree;
 }
 
 function initialize_images($directory) {
