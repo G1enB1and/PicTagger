@@ -17,5 +17,25 @@ export function handleKeyPress(event) {
     }
 }
 
-// Export expandAll and collapseAll
-export { expandAll, collapseAll };
+
+export function expandAll() {
+    const toggleIcons = document.querySelectorAll('#fileTree .toggle-icon');
+    toggleIcons.forEach(icon => {
+        const subList = icon.parentElement.querySelector('ul');
+        if (subList) {
+            subList.style.display = 'block';
+            icon.innerHTML = '&#9660;';
+        }
+    });
+}
+
+export function collapseAll() {
+    const toggleIcons = document.querySelectorAll('#fileTree .toggle-icon');
+    toggleIcons.forEach(icon => {
+        const subList = icon.parentElement.querySelector('ul');
+        if (subList) {
+            subList.style.display = 'none';
+            icon.innerHTML = '&#9654;';
+        }
+    });
+}

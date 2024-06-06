@@ -1,16 +1,16 @@
 import { setData, displayImageWithUrlUpdate } from './media.js';
 
 export function populateFileTree() {
-    const fileTreeContainer = document.getElementById('fileTree');
     fetch('api.php?action=get_file_tree')
         .then(response => response.json())
         .then(data => {
+            const fileTreeContainer = document.getElementById('fileTree');
             buildFileTree(fileTreeContainer, data);
         })
         .catch(error => console.error('Error fetching file tree:', error));
 }
 
-function buildFileTree(container, nodes) {
+export function buildFileTree(container, nodes) {
     container.innerHTML = '';
     nodes.forEach(node => {
         if (node.type === 'directory') {
@@ -60,12 +60,10 @@ function buildFileTree(container, nodes) {
                             .then(response => response.json())
                             .then(images => {
                                 setData(images);
-                                if (images.length > 0) {
-                                    displayImageWithUrlUpdate(images[0]);
-                                }
+                                displayImageWithUrlUpdate(images[0]); // Display the first image from the selected folder
                             })
                             .catch(error => console.error('Error fetching images:', error));
-                    }, 300);
+                    }, 500);
                 })
                 .catch(error => console.error('Error updating images:', error));
             });

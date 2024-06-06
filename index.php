@@ -12,6 +12,7 @@
 <body>
     <?php include 'header.php'; ?>
     <div class="container">
+
         <?php
         $showLeftPanel = true; // Default state
 
@@ -27,7 +28,7 @@
             echo '</div>';
         }
         ?>
-
+        
         <div class="main-content" id="mainContent">
             <?php include 'mainContent.php'; ?>
         </div>
@@ -39,6 +40,10 @@
         if (isset($_GET['dataPanelToggle']) && $_GET['dataPanelToggle'] === 'hide') {
             $showDataPanel = false;
         }
+
+        echo '<div class="main-content">';
+        include 'mainContent.php';
+        echo '</div>';
 
         if ($showDataPanel) {
             echo '<div class="data-panel">';

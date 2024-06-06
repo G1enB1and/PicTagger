@@ -1,26 +1,24 @@
 let data = [];
-let intervalId = null;
 let preloadedNextImage = new Image();
 let preloadedPrevImage = new Image();
 
-export function getIntervalId() {
-    return intervalId;
+export function setData(images) {
+    data = images;
+    renderImages();
 }
 
-export function setIntervalId(id) {
-    intervalId = id;
-}
-
-export function renderImages(images) {
+function renderImages() {
     const imageGrid = document.getElementById('imageGrid');
+    if (!imageGrid) {
+        console.error('Image grid container not found.');
+        return;
+    }
+
     imageGrid.innerHTML = '';
-    images.forEach((mediaPath) => {
-        const mediaElement = document.createElement(mediaPath.endsWith('.mp4') ? 'video' : 'img');
+    data.forEach(mediaPath => {
+        const mediaElement = document.createElement('img');
         mediaElement.src = mediaPath;
         mediaElement.classList.add('imageItem');
-        if (mediaPath.endsWith('.mp4')) {
-            mediaElement.controls = true;
-        }
         mediaElement.addEventListener('click', () => handleImageClick(mediaPath));
         imageGrid.appendChild(mediaElement);
     });
@@ -50,10 +48,6 @@ export function displayMedia(mediaUrl) {
     const imageElement = document.getElementById('slideshowDisplayedImage');
     const videoElement = document.getElementById('slideshowDisplayedVideo');
 
-    console.log('displayMedia called');
-    console.log('mediaUrl:', mediaUrl);
-    console.log('data:', data);
-
     if (imageElement) {
         imageElement.style.display = 'none';
     }
@@ -63,11 +57,9 @@ export function displayMedia(mediaUrl) {
     }
 
     if (mediaUrl) {
-        console.log(`Displaying media from URL: ${mediaUrl}`);
         preloadAndDisplayMedia(decodeURIComponent(mediaUrl), imageElement, videoElement);
     } else if (data.length > 0) {
         const firstMediaUrl = data[0];
-        console.log(`Displaying first media: ${firstMediaUrl}`);
         preloadAndDisplayMedia(firstMediaUrl, imageElement, videoElement);
         history.replaceState(null, '', `?image=${encodeURIComponent(firstMediaUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
     } else {
@@ -76,7 +68,6 @@ export function displayMedia(mediaUrl) {
 }
 
 function preloadAndDisplayMedia(src, imgElement, vidElement) {
-    console.log('preloadAndDisplayMedia called with src:', src);
     const isVideo = src.endsWith('.mp4');
     if (isVideo && vidElement) {
         vidElement.src = src;
@@ -90,7 +81,6 @@ function preloadAndDisplayMedia(src, imgElement, vidElement) {
         preloader.onload = () => {
             imgElement.src = src;
             imgElement.style.display = 'block';
-            console.log(`Image loaded and displayed: ${src}`);
         };
         preloader.onerror = () => {
             console.error(`Failed to load image: ${src}`);
@@ -112,14 +102,11 @@ export function preloadAdjacentMedia() {
 
     preloadedNextImage.src = data[nextIndex];
     preloadedPrevImage.src = data[prevIndex];
-
-    console.log(`Preloading next media: ${data[nextIndex]}`);
-    console.log(`Preloading previous media: ${data[prevIndex]}`);
 }
 
 export function nextImage() {
     const currentMediaUrl = getCurrentImageUrl();
-    const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
+    const panelState = getPanelState() ? 'open' : 'closed';
     if (!currentMediaUrl) {
         console.error('Media URL not found.');
         return;
@@ -129,7 +116,6 @@ export function nextImage() {
     const nextMediaUrl = data[nextIndex];
     if (nextMediaUrl) {
         window.location.href = `index.php?image=${encodeURIComponent(nextMediaUrl)}&panel=${panelState}`;
-        console.log(`Navigating to next media: ${nextMediaUrl}`);
     } else {
         console.error('Next media URL not found.');
     }
@@ -137,7 +123,7 @@ export function nextImage() {
 
 export function prevImage() {
     const currentMediaUrl = getCurrentImageUrl();
-    const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
+    const panelState = getPanelState() ? 'open' : 'closed';
     if (!currentMediaUrl) {
         console.error('Media URL not found.');
         return;
@@ -147,7 +133,6 @@ export function prevImage() {
     const prevMediaUrl = data[prevIndex];
     if (prevMediaUrl) {
         window.location.href = `index.php?image=${encodeURIComponent(prevMediaUrl)}&panel=${panelState}`;
-        console.log(`Navigating to previous media: ${prevMediaUrl}`);
     } else {
         console.error('Previous media URL not found.');
     }
@@ -159,48 +144,35 @@ export function togglePlayPause() {
     const pauseIcon = playPauseButton.querySelector('.fa-pause');
     if (intervalId) {
         clearInterval(intervalId);
-        setIntervalId(null);
-        playIcon.style.display = 'block';
-        pauseIcon.style.display = 'none';
+        intervalId = null;
+        if (playIcon) playIcon.style.display = 'block';
+        if (pauseIcon) pauseIcon.style.display = 'none';
         sessionStorage.setItem('isPlaying', 'false');
-        console.log('Paused');
     } else {
-        setIntervalId(setInterval(nextImage, 5000));
-        playIcon.style.display = 'none';
-        pauseIcon.style.display = 'block';
+        intervalId = setInterval(nextImage, 4000); // Set interval to 4 seconds
+        if (playIcon) playIcon.style.display = 'none';
+        if (pauseIcon) pauseIcon.style.display = 'block';
         sessionStorage.setItem('isPlaying', 'true');
-        console.log('Playing');
     }
-}
-
-export function setData(images) {
-    data = images;
-}
-
-function getCurrentImageUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const currentImageUrl = params.get('image');
-    console.log(`Current image URL: ${currentImageUrl}`);
-    return currentImageUrl;
-}
-
-function getPanelState() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('panel') === 'open';
 }
 
 export function displayImageWithUrlUpdate(mediaUrl) {
     const imageElement = document.getElementById('slideshowDisplayedImage');
     const videoElement = document.getElementById('slideshowDisplayedVideo');
-    imageElement.style.display = 'none';
-    videoElement.style.display = 'none';
+
+    if (imageElement) {
+        imageElement.style.display = 'none';
+    }
+    if (videoElement) {
+        videoElement.style.display = 'none';
+    }
 
     const isVideo = mediaUrl.endsWith('.mp4');
-    if (isVideo) {
+    if (isVideo && videoElement) {
         videoElement.src = mediaUrl;
         videoElement.style.display = 'block';
         videoElement.load();
-    } else {
+    } else if (imageElement) {
         const preloader = new Image();
         preloader.onload = () => {
             imageElement.src = mediaUrl;
@@ -212,4 +184,14 @@ export function displayImageWithUrlUpdate(mediaUrl) {
         };
         preloader.src = mediaUrl;
     }
+}
+
+function getCurrentImageUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('image');
+}
+
+function getPanelState() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('panel') === 'open';
 }
